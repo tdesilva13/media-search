@@ -14,12 +14,14 @@
 <link rel="icon" type="image/svg+xml" href="icon.svg">
 <link rel="apple-touch-icon" href="icon-192.png">
 <style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   body {
     min-height: 100vh;
+    min-height: 100dvh;
     background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
     color: #fff;
+    overflow-x: hidden;
   }
   a { color: #818cf8; text-decoration: none; }
   a:hover { text-decoration: underline; }
@@ -27,21 +29,21 @@
   /* ── SETUP SCREEN ─────────────────────────────────── */
   #setup-screen {
     display: flex; align-items: center; justify-content: center;
-    min-height: 100vh; padding: 20px;
+    min-height: 100vh; min-height: 100dvh; padding: 16px;
   }
   .setup-card {
     background: rgba(255,255,255,0.05);
     border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 20px; padding: 40px; max-width: 480px; width: 100%;
+    border-radius: 20px; padding: 28px; max-width: 480px; width: 100%;
     text-align: center;
   }
-  .setup-card h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .setup-card h1 { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
   .setup-card .subtitle {
-    color: rgba(255,255,255,0.6); margin-bottom: 32px; line-height: 1.6;
+    color: rgba(255,255,255,0.6); margin-bottom: 24px; line-height: 1.6; font-size: 14px;
   }
   .setup-instructions {
     background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 12px; padding: 20px; margin-bottom: 24px; text-align: left;
+    border-radius: 12px; padding: 16px; margin-bottom: 20px; text-align: left;
   }
   .setup-instructions p { color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 12px; }
   .setup-instructions ol {
@@ -49,15 +51,15 @@
   }
   .setup-row { display: flex; gap: 8px; }
   .setup-row input {
-    flex: 1; padding: 12px 16px; border-radius: 12px;
+    flex: 1; padding: 14px 16px; border-radius: 12px;
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-    color: #fff; font-size: 14px; outline: none;
+    color: #fff; font-size: 16px; outline: none;
   }
   .setup-row input:focus { border-color: rgba(129,140,248,0.5); }
   .setup-row button {
-    padding: 12px 24px; border-radius: 12px; border: none;
+    padding: 14px 24px; border-radius: 12px; border: none;
     background: #818cf8; color: #fff; font-weight: 600; cursor: pointer;
-    font-size: 14px; transition: all 0.2s;
+    font-size: 16px; transition: all 0.2s; min-height: 48px;
   }
   .setup-row button:hover { background: #6366f1; }
   .setup-row button:disabled { background: rgba(255,255,255,0.1); cursor: default; }
@@ -67,27 +69,41 @@
   .container { max-width: 1200px; margin: 0 auto; }
 
   /* Header */
-  .header { padding: 24px 24px 0; }
+  .header { padding: 16px 16px 0; }
   .header-row {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+    margin-bottom: 16px; flex-wrap: wrap; gap: 10px;
   }
-  .logo-area { display: flex; align-items: center; gap: 12px; }
-  .logo-area h1 { font-size: 22px; font-weight: 700; }
-  .logo-area p { font-size: 12px; color: rgba(255,255,255,0.4); }
+  .logo-area { display: flex; align-items: center; gap: 10px; }
+  .logo-area h1 { font-size: 20px; font-weight: 700; }
+  .logo-area p { font-size: 11px; color: rgba(255,255,255,0.4); }
+  .header-actions { display: flex; align-items: center; gap: 8px; }
   .region-select {
-    padding: 8px 12px; border-radius: 8px;
+    padding: 10px 12px; border-radius: 10px;
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-    color: #fff; font-size: 13px; cursor: pointer; outline: none;
+    color: #fff; font-size: 14px; cursor: pointer; outline: none;
+    min-height: 44px;
+  }
+  .change-key-btn {
+    padding: 10px 12px; border-radius: 10px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: rgba(255,255,255,0.5); font-size: 12px; cursor: pointer;
+    min-height: 44px; white-space: nowrap;
   }
 
-  /* Subscriptions bar */
-  .subs-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  /* Subscriptions bar — horizontally scrollable on mobile */
+  .subs-bar {
+    display: flex; gap: 8px; margin-bottom: 14px;
+    overflow-x: auto; -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; padding-bottom: 4px;
+  }
+  .subs-bar::-webkit-scrollbar { display: none; }
   .sub-chip {
     display: flex; align-items: center; gap: 8px;
-    padding: 6px 14px 6px 8px;
+    padding: 8px 14px 8px 8px;
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px; font-size: 13px; color: rgba(255,255,255,0.7);
+    flex-shrink: 0; min-height: 40px;
   }
   .sub-logo {
     width: 24px; height: 24px; border-radius: 6px;
@@ -95,48 +111,52 @@
     color: white; font-weight: 700; font-size: 10px; flex-shrink: 0;
   }
 
-  /* Search */
-  .search-wrapper {
-    display: flex; align-items: center; gap: 12px;
+  /* Search — stacks on mobile */
+  .search-area { margin-bottom: 8px; }
+  .search-bar {
+    display: flex; align-items: center; gap: 10px;
     background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 16px; padding: 4px 4px 4px 20px; margin-bottom: 8px;
-    transition: border-color 0.2s;
+    border-radius: 14px; padding: 4px 4px 4px 16px;
+    transition: border-color 0.2s; min-height: 52px;
   }
-  .search-wrapper:focus-within { border-color: rgba(129,140,248,0.4); }
-  .search-icon { color: rgba(255,255,255,0.4); display: flex; }
+  .search-bar:focus-within { border-color: rgba(129,140,248,0.4); }
+  .search-icon { color: rgba(255,255,255,0.4); display: flex; flex-shrink: 0; }
   #search-input {
-    flex: 1; padding: 14px 0; background: transparent; border: none;
-    color: #fff; font-size: 16px; outline: none;
+    flex: 1; padding: 12px 0; background: transparent; border: none;
+    color: #fff; font-size: 16px; outline: none; min-width: 0;
   }
   #search-input::placeholder { color: rgba(255,255,255,0.3); }
   .clear-btn {
     background: none; border: none; color: rgba(255,255,255,0.4);
-    cursor: pointer; padding: 8px; display: none; font-size: 18px;
+    cursor: pointer; padding: 10px; display: none; font-size: 20px;
+    min-width: 44px; min-height: 44px;
+    display: flex; align-items: center; justify-content: center;
   }
+  .clear-btn { display: none; }
   .type-filters {
-    display: flex; gap: 2px; padding: 2px;
-    background: rgba(255,255,255,0.06); border-radius: 12px;
+    display: flex; gap: 6px; margin-top: 10px;
   }
   .type-btn {
-    padding: 8px 16px; border-radius: 10px; border: none;
-    background: transparent; color: rgba(255,255,255,0.4);
-    font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    flex: 1; padding: 10px 14px; border-radius: 10px; border: none;
+    background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.4);
+    font-size: 14px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+    min-height: 44px;
   }
   .type-btn.active {
     background: rgba(129,140,248,0.3); color: #c7d2fe;
   }
 
   /* Content area */
-  .content { padding: 16px 24px 40px; }
+  .content { padding: 14px 16px 100px; }
   .empty-state {
-    text-align: center; padding: 80px 20px; color: rgba(255,255,255,0.3);
+    text-align: center; padding: 60px 20px; color: rgba(255,255,255,0.3);
   }
-  .empty-state .icon { font-size: 56px; margin-bottom: 16px; }
-  .empty-state .title { font-size: 18px; margin-bottom: 8px; }
+  .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+  .empty-state .title { font-size: 17px; margin-bottom: 8px; }
   .empty-state .sub { font-size: 14px; }
 
   /* Loading spinner */
-  .loading { text-align: center; padding: 60px; color: rgba(255,255,255,0.4); }
+  .loading { text-align: center; padding: 40px; color: rgba(255,255,255,0.4); }
   .spinner {
     width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.1);
     border-top: 3px solid #818cf8; border-radius: 50%;
@@ -151,31 +171,21 @@
     color: #fca5a5; font-size: 14px;
   }
 
-  /* Results layout */
-  .results-layout { display: grid; gap: 24px; }
-  .results-layout.with-detail { grid-template-columns: 1fr 400px; }
-  @media (max-width: 900px) {
-    .results-layout.with-detail { grid-template-columns: 1fr; }
-  }
-
-  /* Results grid */
+  /* Results grid — 2 columns on mobile by default */
   .results-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 16px;
-  }
-  .results-grid.compact {
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
   }
 
   /* Result card */
   .result-card {
     background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 0.2s;
+    border-radius: 12px; overflow: hidden; cursor: pointer; transition: all 0.2s;
+    -webkit-user-select: none; user-select: none;
   }
-  .result-card:hover {
-    background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15);
-    transform: translateY(-2px);
+  .result-card:active {
+    background: rgba(255,255,255,0.07); transform: scale(0.97);
   }
   .result-card.selected {
     background: rgba(129,140,248,0.15); border-color: rgba(129,140,248,0.4);
@@ -186,46 +196,77 @@
   .poster-wrap img { width: 100%; height: 100%; object-fit: cover; }
   .poster-placeholder {
     width: 100%; height: 100%; display: flex; align-items: center;
-    justify-content: center; color: rgba(255,255,255,0.2); font-size: 40px;
+    justify-content: center; color: rgba(255,255,255,0.2); font-size: 36px;
   }
   .badge {
     position: absolute; display: flex; align-items: center; gap: 4px;
-    background: rgba(0,0,0,0.7); border-radius: 6px; padding: 3px 8px;
-    font-size: 11px; color: rgba(255,255,255,0.8);
+    background: rgba(0,0,0,0.7); border-radius: 6px; padding: 3px 7px;
+    font-size: 10px; color: rgba(255,255,255,0.8);
   }
-  .badge-type { top: 8px; left: 8px; }
-  .badge-rating { top: 8px; right: 8px; color: #fbbf24; }
-  .card-info { padding: 12px; }
+  .badge-type { top: 6px; left: 6px; }
+  .badge-rating { top: 6px; right: 6px; color: #fbbf24; }
+  .card-info { padding: 10px; }
   .card-info h3 {
-    font-size: 14px; font-weight: 600; margin-bottom: 4px;
+    font-size: 13px; font-weight: 600; margin-bottom: 3px;
     overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
-  .card-info .year { font-size: 12px; color: rgba(255,255,255,0.4); }
+  .card-info .year { font-size: 11px; color: rgba(255,255,255,0.4); }
 
-  /* Detail panel */
-  .detail-panel {
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 16px; padding: 24px; align-self: start; position: sticky; top: 24px;
+  /* ── DETAIL PANEL — SLIDE-UP OVERLAY ON MOBILE ──── */
+  .detail-overlay {
+    position: fixed; inset: 0; z-index: 1000;
+    display: flex; flex-direction: column; justify-content: flex-end;
+    pointer-events: none; opacity: 0; transition: opacity 0.25s ease;
   }
-  .detail-header { display: flex; gap: 16px; margin-bottom: 20px; }
-  .detail-header img { width: 80px; border-radius: 10px; flex-shrink: 0; }
-  .detail-header h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-  .detail-meta { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+  .detail-overlay.active {
+    pointer-events: auto; opacity: 1;
+  }
+  .detail-backdrop {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.6);
+  }
+  .detail-panel {
+    position: relative; z-index: 1;
+    background: #1a1a3e; border-top: 1px solid rgba(255,255,255,0.15);
+    border-radius: 20px 20px 0 0;
+    padding: 20px 20px 32px; max-height: 85vh; max-height: 85dvh;
+    overflow-y: auto; -webkit-overflow-scrolling: touch;
+    transform: translateY(100%); transition: transform 0.3s ease;
+  }
+  .detail-overlay.active .detail-panel {
+    transform: translateY(0);
+  }
+  .detail-handle {
+    width: 36px; height: 4px; background: rgba(255,255,255,0.2);
+    border-radius: 2px; margin: 0 auto 16px;
+  }
+  .detail-close {
+    position: absolute; top: 16px; right: 16px;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: rgba(255,255,255,0.1); border: none;
+    color: rgba(255,255,255,0.6); font-size: 20px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    min-width: 44px; min-height: 44px;
+  }
+  .detail-header { display: flex; gap: 14px; margin-bottom: 16px; }
+  .detail-header img { width: 72px; border-radius: 10px; flex-shrink: 0; }
+  .detail-header h2 { font-size: 17px; font-weight: 700; margin-bottom: 4px; line-height: 1.3; }
+  .detail-meta { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
   .detail-rating { display: flex; align-items: center; gap: 4px; color: #fbbf24; font-size: 14px; }
   .detail-overview {
-    font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.5); margin-bottom: 20px;
+    font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.5); margin-bottom: 18px;
   }
 
   /* Provider sections */
   .section-title {
     font-size: 12px; font-weight: 600; text-transform: uppercase;
     letter-spacing: 1px; color: rgba(255,255,255,0.3);
-    margin-bottom: 12px; padding-bottom: 8px;
+    margin-bottom: 10px; padding-bottom: 8px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
   }
   .provider-row {
-    display: flex; align-items: center; gap: 12px;
-    padding: 10px 14px; border-radius: 10px; margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 12px; border-radius: 10px; margin-bottom: 6px;
+    min-height: 48px;
   }
   .provider-row.available {
     background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2);
@@ -251,9 +292,9 @@
   }
 
   /* Extra info badges */
-  .extra-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  .extra-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
   .extra-badge {
-    padding: 4px 10px; border-radius: 6px; font-size: 12px;
+    padding: 6px 12px; border-radius: 8px; font-size: 12px;
   }
   .badge-rent {
     background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2); color: #fbbf24;
@@ -263,10 +304,10 @@
   }
 
   /* Other providers */
-  .other-providers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  .other-providers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 14px; }
   .other-chip {
     display: flex; align-items: center; gap: 6px;
-    padding: 5px 10px; background: rgba(255,255,255,0.04);
+    padding: 6px 10px; background: rgba(255,255,255,0.04);
     border: 1px solid rgba(255,255,255,0.08);
     border-radius: 8px; font-size: 12px; color: rgba(255,255,255,0.6);
   }
@@ -275,26 +316,80 @@
   /* TMDB link */
   .tmdb-link {
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    margin-top: 20px; padding: 10px 16px;
+    margin-top: 18px; padding: 12px 16px;
     background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
     border-radius: 10px; color: #818cf8; font-size: 13px; font-weight: 500;
-    text-decoration: none; transition: all 0.2s;
+    text-decoration: none; transition: all 0.2s; min-height: 48px;
   }
   .tmdb-link:hover { background: rgba(255,255,255,0.1); text-decoration: none; }
 
   /* Watch now button */
   .watch-btn {
     display: inline-flex; align-items: center; gap: 5px;
-    padding: 5px 12px; border-radius: 7px; border: none;
+    padding: 8px 14px; border-radius: 8px; border: none;
     font-size: 12px; font-weight: 600; cursor: pointer;
     color: #fff; text-decoration: none; transition: all 0.15s;
+    min-height: 36px; white-space: nowrap;
   }
   .watch-btn:hover { filter: brightness(1.2); text-decoration: none; }
 
   /* Footer */
   .footer {
-    text-align: center; padding: 16px 24px;
+    text-align: center; padding: 16px;
     color: rgba(255,255,255,0.2); font-size: 11px;
+  }
+
+  /* ── DESKTOP OVERRIDES (768px+) ─────────────────── */
+  @media (min-width: 768px) {
+    .header { padding: 24px 24px 0; }
+    .content { padding: 16px 24px 40px; }
+    .setup-card { padding: 40px; }
+    .setup-card h1 { font-size: 24px; }
+    .logo-area h1 { font-size: 22px; }
+    .search-bar { padding: 4px 4px 4px 20px; }
+    .type-filters { margin-top: 12px; }
+    .type-btn { flex: none; padding: 10px 20px; }
+
+    .results-grid {
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 16px;
+    }
+    .results-grid.compact {
+      grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    }
+
+    /* Desktop: side panel instead of overlay */
+    .detail-overlay {
+      position: static; pointer-events: auto; opacity: 1;
+      display: block;
+    }
+    .detail-backdrop { display: none; }
+    .detail-panel {
+      transform: none; border-radius: 16px; max-height: none;
+      position: sticky; top: 24px; padding: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+    }
+    .detail-handle { display: none; }
+    .detail-close { display: none; }
+
+    .results-layout { display: grid; gap: 24px; }
+    .results-layout.with-detail { grid-template-columns: 1fr 400px; }
+
+    .result-card:hover {
+      background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15);
+      transform: translateY(-2px);
+    }
+    .result-card:active { transform: translateY(-2px); }
+  }
+
+  @media (min-width: 1024px) {
+    .results-grid {
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    }
+    .results-grid.compact {
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    }
   }
 </style>
 </head>
@@ -330,37 +425,39 @@
     <div class="header">
       <div class="header-row">
         <div class="logo-area">
-          <span style="font-size:28px">🎬</span>
+          <span style="font-size:26px">🎬</span>
           <div>
             <h1>Media Search</h1>
             <p>Find where to stream anything</p>
           </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
+        <div class="header-actions">
           <select class="region-select" id="region-select" onchange="onRegionChange()">
             <option value="CA">🇨🇦 Canada</option>
             <option value="US">🇺🇸 USA</option>
             <option value="GB">🇬🇧 UK</option>
             <option value="AU">🇦🇺 Australia</option>
           </select>
-          <button onclick="resetApiKey()" style="padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer">Change API Key</button>
+          <button class="change-key-btn" onclick="resetApiKey()">Change Key</button>
         </div>
       </div>
 
       <!-- Subscriptions bar -->
       <div class="subs-bar" id="subs-bar"></div>
 
-      <!-- Search bar -->
-      <div class="search-wrapper">
-        <span class="search-icon">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        </span>
-        <input type="text" id="search-input" placeholder="Search for a movie or TV show..." autofocus />
-        <button class="clear-btn" id="clear-btn" onclick="clearSearch()">×</button>
+      <!-- Search bar — input and filters stacked -->
+      <div class="search-area">
+        <div class="search-bar">
+          <span class="search-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          </span>
+          <input type="text" id="search-input" placeholder="Search movies & TV shows..." autofocus />
+          <button class="clear-btn" id="clear-btn" onclick="clearSearch()">×</button>
+        </div>
         <div class="type-filters">
           <button class="type-btn active" data-type="multi" onclick="setType(this)">All</button>
           <button class="type-btn" data-type="movie" onclick="setType(this)">Movies</button>
-          <button class="type-btn" data-type="tv" onclick="setType(this)">TV</button>
+          <button class="type-btn" data-type="tv" onclick="setType(this)">TV Shows</button>
         </div>
       </div>
     </div>
@@ -376,6 +473,12 @@
   </div>
 
   <div class="footer">Streaming data provided by JustWatch via TMDB</div>
+</div>
+
+<!-- Detail overlay (lives outside container for mobile overlay) -->
+<div class="detail-overlay" id="detail-overlay">
+  <div class="detail-backdrop" onclick="closeDetail()"></div>
+  <div class="detail-panel" id="detail-panel"></div>
 </div>
 
 <script>
@@ -399,9 +502,9 @@ let selectedItem = null;
 let providers = null;
 let debounceTimer = null;
 
+function isMobile() { return window.innerWidth < 768; }
+
 // ─── INIT ───────────────────────────────────────────────────
-// Try to load a saved key
-// Auto-load saved key on future visits
 const savedKey = (() => { try { return localStorage.getItem("tmdb_api_key"); } catch(e) { return null; } })();
 if (savedKey) {
   API_KEY = savedKey;
@@ -440,7 +543,7 @@ function renderSubsBar() {
 // ─── SEARCH ─────────────────────────────────────────────────
 document.getElementById("search-input").addEventListener("input", e => {
   const q = e.target.value;
-  document.getElementById("clear-btn").style.display = q ? "block" : "none";
+  document.getElementById("clear-btn").style.display = q ? "flex" : "none";
   if (debounceTimer) clearTimeout(debounceTimer);
   debounceTimer = setTimeout(() => search(q), 400);
 });
@@ -458,6 +561,7 @@ function clearSearch() {
   results = [];
   selectedItem = null;
   providers = null;
+  closeDetail();
   renderContent();
 }
 
@@ -475,9 +579,10 @@ function onRegionChange() {
 }
 
 async function search(q) {
-  if (!q.trim()) { results = []; selectedItem = null; providers = null; renderContent(); return; }
+  if (!q.trim()) { results = []; selectedItem = null; providers = null; closeDetail(); renderContent(); return; }
   selectedItem = null;
   providers = null;
+  closeDetail();
   renderLoading();
   try {
     const endpoint = searchType === "multi" ? "search/multi" : `search/${searchType}`;
@@ -504,15 +609,126 @@ async function getProviders(item) {
   selectedItem = item;
   providers = null;
   renderContent();
+  renderDetailPanel();
   try {
     const type = item.media_type === "movie" ? "movie" : "tv";
     const res = await fetch(`${TMDB_BASE}/${type}/${item.id}/watch/providers?api_key=${API_KEY}`);
     if (!res.ok) throw new Error("Failed to fetch providers");
     const data = await res.json();
     providers = data.results?.[region] || null;
-    renderContent();
+    renderDetailPanel();
   } catch (e) {
     renderError(e.message);
+  }
+}
+
+// ─── DETAIL PANEL ───────────────────────────────────────────
+function closeDetail() {
+  selectedItem = null;
+  providers = null;
+  const overlay = document.getElementById("detail-overlay");
+  overlay.classList.remove("active");
+  document.body.style.overflow = "";
+  renderContent();
+}
+
+function renderDetailPanel() {
+  if (!selectedItem) return;
+
+  const overlay = document.getElementById("detail-overlay");
+  const panel = document.getElementById("detail-panel");
+
+  const title = selectedItem.title || selectedItem.name;
+  const year = (selectedItem.release_date || selectedItem.first_air_date || "").slice(0, 4);
+  const typeLabel = selectedItem.media_type === "movie" ? "Movie" : "TV Series";
+  const overview = selectedItem.overview
+    ? (selectedItem.overview.length > 200 ? selectedItem.overview.slice(0, 200) + "..." : selectedItem.overview)
+    : "";
+
+  let html = `<div class="detail-handle"></div>`;
+  html += `<button class="detail-close" onclick="closeDetail()">×</button>`;
+  html += `<div class="detail-header">`;
+  if (selectedItem.poster_path) {
+    html += `<img src="${IMG_BASE}/w185${selectedItem.poster_path}" alt="" />`;
+  }
+  html += `<div>
+    <h2>${escHtml(title)}</h2>
+    <p class="detail-meta">${typeLabel}${year ? ` • ${year}` : ""}</p>
+    ${selectedItem.vote_average > 0 ? `<div class="detail-rating">⭐ ${selectedItem.vote_average.toFixed(1)} <span style="color:rgba(255,255,255,0.3);font-size:12px">/10</span></div>` : ""}
+  </div></div>`;
+
+  if (overview) html += `<p class="detail-overview">${escHtml(overview)}</p>`;
+
+  if (providers === null && selectedItem) {
+    html += `<div class="loading" style="padding:20px"><div class="spinner"></div>Checking availability...</div>`;
+  } else {
+    // My subscriptions
+    html += `<div class="section-title">Your Subscriptions</div>`;
+    const flatrate = providers?.flatrate || [];
+    const myAvailable = MY_SERVICES.filter(s => s.id && flatrate.some(p => p.provider_id === s.id));
+    const itemTitle = selectedItem.title || selectedItem.name;
+
+    for (const s of MY_SERVICES) {
+      const available = myAvailable.some(a => a.id === s.id);
+      const watchUrl = s.searchUrl ? s.searchUrl(itemTitle) : "#";
+      html += `
+        <div class="provider-row ${available ? 'available' : 'unavailable'}">
+          <div class="sub-logo" style="background:${s.color};width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;color:white">${s.abbr}</div>
+          <span class="provider-name">${s.name}</span>
+          ${available
+            ? `<a class="watch-btn" href="${watchUrl}" target="_blank" rel="noopener" style="background:${s.color}">
+                Watch Now
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+              </a>`
+            : `<span class="status-unavailable">Not available</span>`}
+        </div>`;
+    }
+
+    if (myAvailable.length === 0 && providers) {
+      html += `<p class="not-included">Not included with any of your subscriptions</p>`;
+    }
+    if (!providers) {
+      html += `<p class="no-data">No streaming data available for ${region}</p>`;
+    }
+
+    // Rent / Buy
+    if (providers?.rent || providers?.buy) {
+      html += `<div class="extra-badges">`;
+      if (providers.rent) html += `<span class="extra-badge badge-rent">Rent on ${providers.rent.length} service${providers.rent.length > 1 ? 's' : ''}</span>`;
+      if (providers.buy) html += `<span class="extra-badge badge-buy">Buy on ${providers.buy.length} service${providers.buy.length > 1 ? 's' : ''}</span>`;
+      html += `</div>`;
+    }
+
+    // Other streaming
+    const myIds = MY_SERVICES.map(s => s.id).filter(Boolean);
+    const others = flatrate.filter(p => !myIds.includes(p.provider_id));
+    if (others.length > 0) {
+      html += `<div style="margin-top:14px"><div class="section-title">Other Streaming Services</div>`;
+      html += `<div class="other-providers">`;
+      for (const p of others) {
+        html += `<div class="other-chip">
+          ${p.logo_path ? `<img src="${IMG_BASE}/w45${p.logo_path}" alt="" />` : ""}
+          ${escHtml(p.provider_name)}
+        </div>`;
+      }
+      html += `</div></div>`;
+    }
+
+    // TMDB link
+    if (providers?.link) {
+      html += `<a class="tmdb-link" href="${providers.link}" target="_blank" rel="noopener">
+        View all options on TMDB
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>`;
+    }
+  }
+
+  panel.innerHTML = html;
+
+  // On mobile, show overlay; on desktop, place inline
+  if (isMobile()) {
+    overlay.classList.add("active");
+    document.body.style.overflow = "hidden";
   }
 }
 
@@ -553,8 +769,8 @@ function renderContent() {
     return;
   }
 
-  // Results
-  const hasDetail = selectedItem !== null;
+  // On desktop with detail: use side-by-side layout
+  const hasDetail = selectedItem !== null && !isMobile();
   let html = `<div class="results-layout ${hasDetail ? 'with-detail' : ''}">`;
 
   // Grid
@@ -565,8 +781,8 @@ function renderContent() {
     const isSelected = selectedItem?.id === item.id;
     const typeLabel = item.media_type === "movie" ? "Movie" : "TV";
     const typeIcon = item.media_type === "movie"
-      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>`
-      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>`;
+      ? `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>`
+      : `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>`;
 
     html += `
       <div class="result-card ${isSelected ? 'selected' : ''}" onclick='getProviders(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
@@ -587,97 +803,25 @@ function renderContent() {
   }
   html += `</div>`;
 
-  // Detail panel
-  if (selectedItem) {
-    const title = selectedItem.title || selectedItem.name;
-    const year = (selectedItem.release_date || selectedItem.first_air_date || "").slice(0, 4);
-    const typeLabel = selectedItem.media_type === "movie" ? "Movie" : "TV Series";
-    const overview = selectedItem.overview
-      ? (selectedItem.overview.length > 200 ? selectedItem.overview.slice(0, 200) + "..." : selectedItem.overview)
-      : "";
-
-    html += `<div class="detail-panel">`;
-    html += `<div class="detail-header">`;
-    if (selectedItem.poster_path) {
-      html += `<img src="${IMG_BASE}/w185${selectedItem.poster_path}" alt="" />`;
-    }
-    html += `<div>
-      <h2>${escHtml(title)}</h2>
-      <p class="detail-meta">${typeLabel}${year ? ` • ${year}` : ""}</p>
-      ${selectedItem.vote_average > 0 ? `<div class="detail-rating">⭐ ${selectedItem.vote_average.toFixed(1)} <span style="color:rgba(255,255,255,0.3);font-size:12px">/10</span></div>` : ""}
-    </div></div>`;
-
-    if (overview) html += `<p class="detail-overview">${escHtml(overview)}</p>`;
-
-    if (providers === null && selectedItem) {
-      html += `<div class="loading" style="padding:20px"><div class="spinner"></div>Checking availability...</div>`;
-    } else {
-      // My subscriptions
-      html += `<div class="section-title">Your Subscriptions</div>`;
-      const flatrate = providers?.flatrate || [];
-      const myAvailable = MY_SERVICES.filter(s => s.id && flatrate.some(p => p.provider_id === s.id));
-
-      const itemTitle = selectedItem.title || selectedItem.name;
-      for (const s of MY_SERVICES) {
-        const available = myAvailable.some(a => a.id === s.id);
-        const watchUrl = s.searchUrl ? s.searchUrl(itemTitle) : "#";
-        html += `
-          <div class="provider-row ${available ? 'available' : 'unavailable'}">
-            <div class="sub-logo" style="background:${s.color};width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;color:white">${s.abbr}</div>
-            <span class="provider-name">${s.name}</span>
-            ${available
-              ? `<a class="watch-btn" href="${watchUrl}" target="_blank" rel="noopener" style="background:${s.color}">
-                  Watch Now
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                </a>`
-              : `<span class="status-unavailable">Not available</span>`}
-          </div>`;
-      }
-
-      if (myAvailable.length === 0 && providers) {
-        html += `<p class="not-included">Not included with any of your subscriptions</p>`;
-      }
-      if (!providers) {
-        html += `<p class="no-data">No streaming data available for ${region}</p>`;
-      }
-
-      // Rent / Buy
-      if (providers?.rent || providers?.buy) {
-        html += `<div class="extra-badges">`;
-        if (providers.rent) html += `<span class="extra-badge badge-rent">Rent on ${providers.rent.length} service${providers.rent.length > 1 ? 's' : ''}</span>`;
-        if (providers.buy) html += `<span class="extra-badge badge-buy">Buy on ${providers.buy.length} service${providers.buy.length > 1 ? 's' : ''}</span>`;
-        html += `</div>`;
-      }
-
-      // Other streaming
-      const myIds = MY_SERVICES.map(s => s.id).filter(Boolean);
-      const others = flatrate.filter(p => !myIds.includes(p.provider_id));
-      if (others.length > 0) {
-        html += `<div style="margin-top:16px"><div class="section-title">Other Streaming Services</div>`;
-        html += `<div class="other-providers">`;
-        for (const p of others) {
-          html += `<div class="other-chip">
-            ${p.logo_path ? `<img src="${IMG_BASE}/w45${p.logo_path}" alt="" />` : ""}
-            ${escHtml(p.provider_name)}
-          </div>`;
-        }
-        html += `</div></div>`;
-      }
-
-      // TMDB link
-      if (providers?.link) {
-        html += `<a class="tmdb-link" href="${providers.link}" target="_blank" rel="noopener">
-          View all options on TMDB
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-        </a>`;
-      }
-    }
-
-    html += `</div>`;
+  // Desktop: inline detail panel
+  if (selectedItem && !isMobile()) {
+    const overlay = document.getElementById("detail-overlay");
+    // Move the overlay content inline on desktop
+    html += `<div id="desktop-detail"></div>`;
   }
 
   html += `</div>`;
   content.innerHTML = html;
+
+  // On desktop, move detail panel into inline slot
+  if (selectedItem && !isMobile()) {
+    const slot = document.getElementById("desktop-detail");
+    if (slot) {
+      const overlay = document.getElementById("detail-overlay");
+      slot.appendChild(overlay);
+      overlay.classList.add("active");
+    }
+  }
 }
 
 function resetApiKey() {
@@ -686,6 +830,7 @@ function resetApiKey() {
   results = [];
   selectedItem = null;
   providers = null;
+  closeDetail();
   document.getElementById("app").style.display = "none";
   document.getElementById("setup-screen").style.display = "flex";
   document.getElementById("api-key-input").value = "";
@@ -697,6 +842,30 @@ function escHtml(str) {
   div.textContent = str;
   return div.innerHTML;
 }
+
+// Handle back button / swipe to close detail on mobile
+window.addEventListener("popstate", () => {
+  if (document.getElementById("detail-overlay").classList.contains("active")) {
+    closeDetail();
+  }
+});
+
+// Close detail when pressing Escape
+document.addEventListener("keydown", e => {
+  if (e.key === "Escape" && selectedItem) closeDetail();
+});
+
+// On resize, re-render to handle mobile/desktop switch
+let resizeTimer;
+window.addEventListener("resize", () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(() => {
+    if (selectedItem) {
+      renderContent();
+      renderDetailPanel();
+    }
+  }, 200);
+});
 
 // ─── PWA SERVICE WORKER REGISTRATION ────────────────────────
 if ('serviceWorker' in navigator) {
