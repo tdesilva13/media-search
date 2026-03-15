@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Media Search</title>
+
+<!-- PWA Meta Tags -->
+<meta name="theme-color" content="#0f0f23">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Media Search">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0f23 0%, #1a1a3e 50%, #0f0f23 100%);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    color: #fff;
+  }
+  a { color: #818cf8; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* ── SETUP SCREEN ─────────────────────────────────── */
+  #setup-screen {
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px;
+  }
+  .setup-card {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px; padding: 40px; max-width: 480px; width: 100%;
+    text-align: center;
+  }
+  .setup-card h1 { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
+  .setup-card .subtitle {
+    color: rgba(255,255,255,0.6); margin-bottom: 32px; line-height: 1.6;
+  }
+  .setup-instructions {
+    background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px; padding: 20px; margin-bottom: 24px; text-align: left;
+  }
+  .setup-instructions p { color: rgba(255,255,255,0.8); font-size: 14px; margin-bottom: 12px; }
+  .setup-instructions ol {
+    color: rgba(255,255,255,0.6); font-size: 13px; padding-left: 20px; line-height: 2;
+  }
+  .setup-row { display: flex; gap: 8px; }
+  .setup-row input {
+    flex: 1; padding: 12px 16px; border-radius: 12px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; font-size: 14px; outline: none;
+  }
+  .setup-row input:focus { border-color: rgba(129,140,248,0.5); }
+  .setup-row button {
+    padding: 12px 24px; border-radius: 12px; border: none;
+    background: #818cf8; color: #fff; font-weight: 600; cursor: pointer;
+    font-size: 14px; transition: all 0.2s;
+  }
+  .setup-row button:hover { background: #6366f1; }
+  .setup-row button:disabled { background: rgba(255,255,255,0.1); cursor: default; }
+
+  /* ── MAIN APP ─────────────────────────────────────── */
+  #app { display: none; }
+  .container { max-width: 1200px; margin: 0 auto; }
+
+  /* Header */
+  .header { padding: 24px 24px 0; }
+  .header-row {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 24px; flex-wrap: wrap; gap: 12px;
+  }
+  .logo-area { display: flex; align-items: center; gap: 12px; }
+  .logo-area h1 { font-size: 22px; font-weight: 700; }
+  .logo-area p { font-size: 12px; color: rgba(255,255,255,0.4); }
+  .region-select {
+    padding: 8px 12px; border-radius: 8px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; font-size: 13px; cursor: pointer; outline: none;
+  }
+
+  /* Subscriptions bar */
+  .subs-bar { display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap; }
+  .sub-chip {
+    display: flex; align-items: center; gap: 8px;
+    padding: 6px 14px 6px 8px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; font-size: 13px; color: rgba(255,255,255,0.7);
+  }
+  .sub-logo {
+    width: 24px; height: 24px; border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-weight: 700; font-size: 10px; flex-shrink: 0;
+  }
+
+  /* Search */
+  .search-wrapper {
+    display: flex; align-items: center; gap: 12px;
+    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 16px; padding: 4px 4px 4px 20px; margin-bottom: 8px;
+    transition: border-color 0.2s;
+  }
+  .search-wrapper:focus-within { border-color: rgba(129,140,248,0.4); }
+  .search-icon { color: rgba(255,255,255,0.4); display: flex; }
+  #search-input {
+    flex: 1; padding: 14px 0; background: transparent; border: none;
+    color: #fff; font-size: 16px; outline: none;
+  }
+  #search-input::placeholder { color: rgba(255,255,255,0.3); }
+  .clear-btn {
+    background: none; border: none; color: rgba(255,255,255,0.4);
+    cursor: pointer; padding: 8px; display: none; font-size: 18px;
+  }
+  .type-filters {
+    display: flex; gap: 2px; padding: 2px;
+    background: rgba(255,255,255,0.06); border-radius: 12px;
+  }
+  .type-btn {
+    padding: 8px 16px; border-radius: 10px; border: none;
+    background: transparent; color: rgba(255,255,255,0.4);
+    font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s;
+  }
+  .type-btn.active {
+    background: rgba(129,140,248,0.3); color: #c7d2fe;
+  }
+
+  /* Content area */
+  .content { padding: 16px 24px 40px; }
+  .empty-state {
+    text-align: center; padding: 80px 20px; color: rgba(255,255,255,0.3);
+  }
+  .empty-state .icon { font-size: 56px; margin-bottom: 16px; }
+  .empty-state .title { font-size: 18px; margin-bottom: 8px; }
+  .empty-state .sub { font-size: 14px; }
+
+  /* Loading spinner */
+  .loading { text-align: center; padding: 60px; color: rgba(255,255,255,0.4); }
+  .spinner {
+    width: 32px; height: 32px; border: 3px solid rgba(255,255,255,0.1);
+    border-top: 3px solid #818cf8; border-radius: 50%;
+    animation: spin 0.8s linear infinite; margin: 0 auto 16px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Error */
+  .error-msg {
+    background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 12px; padding: 12px 16px; margin-bottom: 16px;
+    color: #fca5a5; font-size: 14px;
+  }
+
+  /* Results layout */
+  .results-layout { display: grid; gap: 24px; }
+  .results-layout.with-detail { grid-template-columns: 1fr 400px; }
+  @media (max-width: 900px) {
+    .results-layout.with-detail { grid-template-columns: 1fr; }
+  }
+
+  /* Results grid */
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  .results-grid.compact {
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  }
+
+  /* Result card */
+  .result-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px; overflow: hidden; cursor: pointer; transition: all 0.2s;
+  }
+  .result-card:hover {
+    background: rgba(255,255,255,0.07); border-color: rgba(255,255,255,0.15);
+    transform: translateY(-2px);
+  }
+  .result-card.selected {
+    background: rgba(129,140,248,0.15); border-color: rgba(129,140,248,0.4);
+  }
+  .poster-wrap {
+    aspect-ratio: 2/3; background: #1a1a3e; position: relative; overflow: hidden;
+  }
+  .poster-wrap img { width: 100%; height: 100%; object-fit: cover; }
+  .poster-placeholder {
+    width: 100%; height: 100%; display: flex; align-items: center;
+    justify-content: center; color: rgba(255,255,255,0.2); font-size: 40px;
+  }
+  .badge {
+    position: absolute; display: flex; align-items: center; gap: 4px;
+    background: rgba(0,0,0,0.7); border-radius: 6px; padding: 3px 8px;
+    font-size: 11px; color: rgba(255,255,255,0.8);
+  }
+  .badge-type { top: 8px; left: 8px; }
+  .badge-rating { top: 8px; right: 8px; color: #fbbf24; }
+  .card-info { padding: 12px; }
+  .card-info h3 {
+    font-size: 14px; font-weight: 600; margin-bottom: 4px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .card-info .year { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+  /* Detail panel */
+  .detail-panel {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 24px; align-self: start; position: sticky; top: 24px;
+  }
+  .detail-header { display: flex; gap: 16px; margin-bottom: 20px; }
+  .detail-header img { width: 80px; border-radius: 10px; flex-shrink: 0; }
+  .detail-header h2 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+  .detail-meta { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+  .detail-rating { display: flex; align-items: center; gap: 4px; color: #fbbf24; font-size: 14px; }
+  .detail-overview {
+    font-size: 13px; line-height: 1.6; color: rgba(255,255,255,0.5); margin-bottom: 20px;
+  }
+
+  /* Provider sections */
+  .section-title {
+    font-size: 12px; font-weight: 600; text-transform: uppercase;
+    letter-spacing: 1px; color: rgba(255,255,255,0.3);
+    margin-bottom: 12px; padding-bottom: 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .provider-row {
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px; border-radius: 10px; margin-bottom: 6px;
+  }
+  .provider-row.available {
+    background: rgba(74,222,128,0.08); border: 1px solid rgba(74,222,128,0.2);
+  }
+  .provider-row.unavailable {
+    background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.06);
+  }
+  .provider-name { flex: 1; font-size: 14px; }
+  .provider-row.available .provider-name { color: #fff; }
+  .provider-row.unavailable .provider-name { color: rgba(255,255,255,0.3); }
+  .status-available {
+    color: #4ade80; display: flex; align-items: center; gap: 4px;
+    font-size: 13px; font-weight: 500;
+  }
+  .status-unavailable { color: rgba(255,255,255,0.2); font-size: 13px; }
+  .not-included {
+    font-size: 13px; color: rgba(255,255,255,0.4);
+    text-align: center; font-style: italic; padding: 8px 0;
+  }
+  .no-data {
+    font-size: 13px; color: rgba(255,255,255,0.4);
+    text-align: center; padding: 16px;
+  }
+
+  /* Extra info badges */
+  .extra-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  .extra-badge {
+    padding: 4px 10px; border-radius: 6px; font-size: 12px;
+  }
+  .badge-rent {
+    background: rgba(251,191,36,0.1); border: 1px solid rgba(251,191,36,0.2); color: #fbbf24;
+  }
+  .badge-buy {
+    background: rgba(129,140,248,0.1); border: 1px solid rgba(129,140,248,0.2); color: #a5b4fc;
+  }
+
+  /* Other providers */
+  .other-providers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 16px; }
+  .other-chip {
+    display: flex; align-items: center; gap: 6px;
+    padding: 5px 10px; background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; font-size: 12px; color: rgba(255,255,255,0.6);
+  }
+  .other-chip img { width: 20px; height: 20px; border-radius: 4px; }
+
+  /* TMDB link */
+  .tmdb-link {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    margin-top: 20px; padding: 10px 16px;
+    background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 10px; color: #818cf8; font-size: 13px; font-weight: 500;
+    text-decoration: none; transition: all 0.2s;
+  }
+  .tmdb-link:hover { background: rgba(255,255,255,0.1); text-decoration: none; }
+
+  /* Watch now button */
+  .watch-btn {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 12px; border-radius: 7px; border: none;
+    font-size: 12px; font-weight: 600; cursor: pointer;
+    color: #fff; text-decoration: none; transition: all 0.15s;
+  }
+  .watch-btn:hover { filter: brightness(1.2); text-decoration: none; }
+
+  /* Footer */
+  .footer {
+    text-align: center; padding: 16px 24px;
+    color: rgba(255,255,255,0.2); font-size: 11px;
+  }
+</style>
+</head>
+<body>
+
+<!-- ═══════════ SETUP SCREEN ═══════════ -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <div style="font-size:48px; margin-bottom:16px">🎬</div>
+    <h1>Media Search Dashboard</h1>
+    <p class="subtitle">Search across your streaming subscriptions to find where to watch any movie or show.</p>
+    <div class="setup-instructions">
+      <p>To get started, you need a <strong>free TMDB API key</strong>:</p>
+      <ol>
+        <li>Go to <a href="https://www.themoviedb.org/signup" target="_blank">themoviedb.org/signup</a></li>
+        <li>Create a free account</li>
+        <li>Go to Settings → API → Request API Key</li>
+        <li>Choose "Developer" and fill in the form</li>
+        <li>Copy your <strong>API Key (v3 auth)</strong></li>
+      </ol>
+    </div>
+    <div class="setup-row">
+      <input type="text" id="api-key-input" placeholder="Paste your TMDB API key..." />
+      <button id="go-btn" onclick="activateApp()">Go</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════ MAIN APP ═══════════ -->
+<div id="app">
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <div class="header-row">
+        <div class="logo-area">
+          <span style="font-size:28px">🎬</span>
+          <div>
+            <h1>Media Search</h1>
+            <p>Find where to stream anything</p>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <select class="region-select" id="region-select" onchange="onRegionChange()">
+            <option value="CA">🇨🇦 Canada</option>
+            <option value="US">🇺🇸 USA</option>
+            <option value="GB">🇬🇧 UK</option>
+            <option value="AU">🇦🇺 Australia</option>
+          </select>
+          <button onclick="resetApiKey()" style="padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.5);font-size:12px;cursor:pointer">Change API Key</button>
+        </div>
+      </div>
+
+      <!-- Subscriptions bar -->
+      <div class="subs-bar" id="subs-bar"></div>
+
+      <!-- Search bar -->
+      <div class="search-wrapper">
+        <span class="search-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        </span>
+        <input type="text" id="search-input" placeholder="Search for a movie or TV show..." autofocus />
+        <button class="clear-btn" id="clear-btn" onclick="clearSearch()">×</button>
+        <div class="type-filters">
+          <button class="type-btn active" data-type="multi" onclick="setType(this)">All</button>
+          <button class="type-btn" data-type="movie" onclick="setType(this)">Movies</button>
+          <button class="type-btn" data-type="tv" onclick="setType(this)">TV</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="content" id="content">
+      <div class="empty-state" id="empty-state">
+        <div class="icon">🔍</div>
+        <p class="title">Search for any movie or TV show</p>
+        <p class="sub">We'll tell you which of your subscriptions has it</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">Streaming data provided by JustWatch via TMDB</div>
+</div>
+
+<script>
+// ─── CONFIG ─────────────────────────────────────────────────
+const TMDB_BASE = "https://api.themoviedb.org/3";
+const IMG_BASE = "https://image.tmdb.org/t/p";
+
+const MY_SERVICES = [
+  { id: 8,    name: "Netflix",      color: "#E50914", abbr: "N",  searchUrl: (t) => `https://www.netflix.com/search?q=${encodeURIComponent(t)}` },
+  { id: 337,  name: "Disney+",      color: "#113CCF", abbr: "D+", searchUrl: (t) => `https://www.disneyplus.com/search/${encodeURIComponent(t)}` },
+  { id: 119,  name: "Amazon Prime",  color: "#00A8E1", abbr: "P",  searchUrl: (t) => `https://www.primevideo.com/search?phrase=${encodeURIComponent(t)}` },
+  { id: 230,  name: "Crave",         color: "#0B3D91", abbr: "C",  searchUrl: (t) => `https://www.crave.ca/en/search/${encodeURIComponent(t)}` },
+  { id: null, name: "F1TV",          color: "#E10600", abbr: "F1", searchUrl: (t) => `https://f1tv.formula1.com/` },
+];
+
+let API_KEY = "";
+let searchType = "multi";
+let region = "CA";
+let results = [];
+let selectedItem = null;
+let providers = null;
+let debounceTimer = null;
+
+// ─── INIT ───────────────────────────────────────────────────
+// Try to load a saved key
+// Auto-load saved key on future visits
+const savedKey = (() => { try { return localStorage.getItem("tmdb_api_key"); } catch(e) { return null; } })();
+if (savedKey) {
+  API_KEY = savedKey;
+  document.getElementById("setup-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  renderSubsBar();
+}
+
+function activateApp() {
+  const input = document.getElementById("api-key-input");
+  const key = input.value.trim();
+  if (!key) return;
+  API_KEY = key;
+  try { localStorage.setItem("tmdb_api_key", key); } catch(e) {}
+  document.getElementById("setup-screen").style.display = "none";
+  document.getElementById("app").style.display = "block";
+  renderSubsBar();
+  document.getElementById("search-input").focus();
+}
+
+document.getElementById("api-key-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") activateApp();
+});
+
+// ─── SUBS BAR ───────────────────────────────────────────────
+function renderSubsBar() {
+  const bar = document.getElementById("subs-bar");
+  bar.innerHTML = MY_SERVICES.map(s => `
+    <div class="sub-chip">
+      <div class="sub-logo" style="background:${s.color}">${s.abbr}</div>
+      ${s.name}
+    </div>
+  `).join("");
+}
+
+// ─── SEARCH ─────────────────────────────────────────────────
+document.getElementById("search-input").addEventListener("input", e => {
+  const q = e.target.value;
+  document.getElementById("clear-btn").style.display = q ? "block" : "none";
+  if (debounceTimer) clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => search(q), 400);
+});
+
+document.getElementById("search-input").addEventListener("keydown", e => {
+  if (e.key === "Enter") {
+    if (debounceTimer) clearTimeout(debounceTimer);
+    search(e.target.value);
+  }
+});
+
+function clearSearch() {
+  document.getElementById("search-input").value = "";
+  document.getElementById("clear-btn").style.display = "none";
+  results = [];
+  selectedItem = null;
+  providers = null;
+  renderContent();
+}
+
+function setType(btn) {
+  document.querySelectorAll(".type-btn").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  searchType = btn.dataset.type;
+  const q = document.getElementById("search-input").value;
+  if (q.trim()) search(q);
+}
+
+function onRegionChange() {
+  region = document.getElementById("region-select").value;
+  if (selectedItem) getProviders(selectedItem);
+}
+
+async function search(q) {
+  if (!q.trim()) { results = []; selectedItem = null; providers = null; renderContent(); return; }
+  selectedItem = null;
+  providers = null;
+  renderLoading();
+  try {
+    const endpoint = searchType === "multi" ? "search/multi" : `search/${searchType}`;
+    const res = await fetch(
+      `${TMDB_BASE}/${endpoint}?api_key=${API_KEY}&query=${encodeURIComponent(q)}&include_adult=false&language=en-US&page=1`
+    );
+    if (!res.ok) {
+      if (res.status === 401) throw new Error("Invalid API key. Check your TMDB API key and try again.");
+      throw new Error(`Search failed (${res.status})`);
+    }
+    const data = await res.json();
+    results = data.results
+      .filter(r => r.media_type === "movie" || r.media_type === "tv" || searchType !== "multi")
+      .map(r => ({ ...r, media_type: r.media_type || searchType }))
+      .slice(0, 12);
+    renderContent();
+  } catch (e) {
+    renderError(e.message);
+  }
+}
+
+// ─── GET PROVIDERS ──────────────────────────────────────────
+async function getProviders(item) {
+  selectedItem = item;
+  providers = null;
+  renderContent();
+  try {
+    const type = item.media_type === "movie" ? "movie" : "tv";
+    const res = await fetch(`${TMDB_BASE}/${type}/${item.id}/watch/providers?api_key=${API_KEY}`);
+    if (!res.ok) throw new Error("Failed to fetch providers");
+    const data = await res.json();
+    providers = data.results?.[region] || null;
+    renderContent();
+  } catch (e) {
+    renderError(e.message);
+  }
+}
+
+// ─── RENDER FUNCTIONS ───────────────────────────────────────
+function renderLoading() {
+  document.getElementById("content").innerHTML = `
+    <div class="loading"><div class="spinner"></div>Searching...</div>
+  `;
+}
+
+function renderError(msg) {
+  document.getElementById("content").innerHTML = `<div class="error-msg">${escHtml(msg)}</div>`;
+}
+
+function renderContent() {
+  const content = document.getElementById("content");
+  const q = document.getElementById("search-input").value;
+
+  // Empty state
+  if (!q.trim() && results.length === 0) {
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🔍</div>
+        <p class="title">Search for any movie or TV show</p>
+        <p class="sub">We'll tell you which of your subscriptions has it</p>
+      </div>`;
+    return;
+  }
+
+  // No results
+  if (q.trim() && results.length === 0) {
+    content.innerHTML = `
+      <div class="empty-state">
+        <div class="icon">🤷</div>
+        <p class="title">No results for "${escHtml(q)}"</p>
+        <p class="sub">Try a different search term</p>
+      </div>`;
+    return;
+  }
+
+  // Results
+  const hasDetail = selectedItem !== null;
+  let html = `<div class="results-layout ${hasDetail ? 'with-detail' : ''}">`;
+
+  // Grid
+  html += `<div class="results-grid ${hasDetail ? 'compact' : ''}">`;
+  for (const item of results) {
+    const title = item.title || item.name;
+    const year = (item.release_date || item.first_air_date || "").slice(0, 4);
+    const isSelected = selectedItem?.id === item.id;
+    const typeLabel = item.media_type === "movie" ? "Movie" : "TV";
+    const typeIcon = item.media_type === "movie"
+      ? `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/><line x1="7" y1="2" x2="7" y2="22"/><line x1="17" y1="2" x2="17" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/></svg>`
+      : `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="15" rx="2"/><polyline points="17 2 12 7 7 2"/></svg>`;
+
+    html += `
+      <div class="result-card ${isSelected ? 'selected' : ''}" onclick='getProviders(${JSON.stringify(item).replace(/'/g, "&#39;")})'>
+        <div class="poster-wrap">
+          ${item.poster_path
+            ? `<img src="${IMG_BASE}/w342${item.poster_path}" alt="${escHtml(title)}" loading="lazy" />`
+            : `<div class="poster-placeholder">🎬</div>`}
+          <div class="badge badge-type">${typeIcon} ${typeLabel}</div>
+          ${item.vote_average > 0
+            ? `<div class="badge badge-rating">⭐ ${item.vote_average.toFixed(1)}</div>`
+            : ""}
+        </div>
+        <div class="card-info">
+          <h3>${escHtml(title)}</h3>
+          <p class="year">${year}</p>
+        </div>
+      </div>`;
+  }
+  html += `</div>`;
+
+  // Detail panel
+  if (selectedItem) {
+    const title = selectedItem.title || selectedItem.name;
+    const year = (selectedItem.release_date || selectedItem.first_air_date || "").slice(0, 4);
+    const typeLabel = selectedItem.media_type === "movie" ? "Movie" : "TV Series";
+    const overview = selectedItem.overview
+      ? (selectedItem.overview.length > 200 ? selectedItem.overview.slice(0, 200) + "..." : selectedItem.overview)
+      : "";
+
+    html += `<div class="detail-panel">`;
+    html += `<div class="detail-header">`;
+    if (selectedItem.poster_path) {
+      html += `<img src="${IMG_BASE}/w185${selectedItem.poster_path}" alt="" />`;
+    }
+    html += `<div>
+      <h2>${escHtml(title)}</h2>
+      <p class="detail-meta">${typeLabel}${year ? ` • ${year}` : ""}</p>
+      ${selectedItem.vote_average > 0 ? `<div class="detail-rating">⭐ ${selectedItem.vote_average.toFixed(1)} <span style="color:rgba(255,255,255,0.3);font-size:12px">/10</span></div>` : ""}
+    </div></div>`;
+
+    if (overview) html += `<p class="detail-overview">${escHtml(overview)}</p>`;
+
+    if (providers === null && selectedItem) {
+      html += `<div class="loading" style="padding:20px"><div class="spinner"></div>Checking availability...</div>`;
+    } else {
+      // My subscriptions
+      html += `<div class="section-title">Your Subscriptions</div>`;
+      const flatrate = providers?.flatrate || [];
+      const myAvailable = MY_SERVICES.filter(s => s.id && flatrate.some(p => p.provider_id === s.id));
+
+      const itemTitle = selectedItem.title || selectedItem.name;
+      for (const s of MY_SERVICES) {
+        const available = myAvailable.some(a => a.id === s.id);
+        const watchUrl = s.searchUrl ? s.searchUrl(itemTitle) : "#";
+        html += `
+          <div class="provider-row ${available ? 'available' : 'unavailable'}">
+            <div class="sub-logo" style="background:${s.color};width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:10px;color:white">${s.abbr}</div>
+            <span class="provider-name">${s.name}</span>
+            ${available
+              ? `<a class="watch-btn" href="${watchUrl}" target="_blank" rel="noopener" style="background:${s.color}">
+                  Watch Now
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>`
+              : `<span class="status-unavailable">Not available</span>`}
+          </div>`;
+      }
+
+      if (myAvailable.length === 0 && providers) {
+        html += `<p class="not-included">Not included with any of your subscriptions</p>`;
+      }
+      if (!providers) {
+        html += `<p class="no-data">No streaming data available for ${region}</p>`;
+      }
+
+      // Rent / Buy
+      if (providers?.rent || providers?.buy) {
+        html += `<div class="extra-badges">`;
+        if (providers.rent) html += `<span class="extra-badge badge-rent">Rent on ${providers.rent.length} service${providers.rent.length > 1 ? 's' : ''}</span>`;
+        if (providers.buy) html += `<span class="extra-badge badge-buy">Buy on ${providers.buy.length} service${providers.buy.length > 1 ? 's' : ''}</span>`;
+        html += `</div>`;
+      }
+
+      // Other streaming
+      const myIds = MY_SERVICES.map(s => s.id).filter(Boolean);
+      const others = flatrate.filter(p => !myIds.includes(p.provider_id));
+      if (others.length > 0) {
+        html += `<div style="margin-top:16px"><div class="section-title">Other Streaming Services</div>`;
+        html += `<div class="other-providers">`;
+        for (const p of others) {
+          html += `<div class="other-chip">
+            ${p.logo_path ? `<img src="${IMG_BASE}/w45${p.logo_path}" alt="" />` : ""}
+            ${escHtml(p.provider_name)}
+          </div>`;
+        }
+        html += `</div></div>`;
+      }
+
+      // TMDB link
+      if (providers?.link) {
+        html += `<a class="tmdb-link" href="${providers.link}" target="_blank" rel="noopener">
+          View all options on TMDB
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+        </a>`;
+      }
+    }
+
+    html += `</div>`;
+  }
+
+  html += `</div>`;
+  content.innerHTML = html;
+}
+
+function resetApiKey() {
+  try { localStorage.removeItem("tmdb_api_key"); } catch(e) {}
+  API_KEY = "";
+  results = [];
+  selectedItem = null;
+  providers = null;
+  document.getElementById("app").style.display = "none";
+  document.getElementById("setup-screen").style.display = "flex";
+  document.getElementById("api-key-input").value = "";
+  document.getElementById("api-key-input").focus();
+}
+
+function escHtml(str) {
+  const div = document.createElement("div");
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// ─── PWA SERVICE WORKER REGISTRATION ────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+</script>
+</body>
+</html>
