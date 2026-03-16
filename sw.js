@@ -1,49 +1,35 @@
-const CACHE_NAME = 'media-search-v4';
+const CACHE_NAME = 'media-search-v5';
 const ASSETS = [
     './MediaSearchDashboard.html',
     './manifest.json',
     './icon.svg'
-  ];
+];
 
-// Install — cache the app shell
-self.addEventListener('install', event => {
-    event.waitUntil(
-          caches.open(CACHE_NAME).then(cache => cache.addAll(ASSETS))
-        );
-    self.skipWaiting();
+self.addEventListener('install', e => {
+    e.waitUntil(
+        caches.open(CACHE_NAME)
+            .then(cache => cache.addAll(ASSETS))
+            .then(() => self.skipWaiting())
+    );
 });
 
-// Activate — clean old caches
-self.addEventListener('activate', event => {
-    event.waitUntil(
-          caches.keys().then(keys =>
-                  Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-                                 )
-        );
-    self.clients.claim();
+self.addEventListener('activate', e => {
+    e.waitUntil(
+        caches.keys().then(keys =>
+            Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
+        ).then(() => self.clients.claim())
+    );
 });
 
-// Fetch — network-first for API calls, cache-first for app assets
-self.addEventListener('fetch', event => {
-    const url = new URL(event.request.url);
-
-                        // Always go to network for TMDB API and image requests
-                        if (url.hostname.includes('themoviedb.org') || url.hostname.includes('tmdb.org')) {
-                              event.respondWith(fetch(event.request));
-                              return;
-                        }
-
-                        // Cache-first for app assets
-                        event.respondWith(
-                              caches.match(event.request).then(cached => {
-                                      return cached || fetch(event.request).then(response => {
-                                                // Cache new successful responses
-                                                                                         if (response.ok) {
-                                                                                                     const clone = response.clone();
-                                                                                                     caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-                                                                                         }
-                                                return response;
-                                      });
-                              })
-                            );
+self.addEventListener('fetch', e => {
+    const url = new URL(e.request.url);
+    if (url.hostname === 'api.themoviedb.org' || url.hostname === 'image.tmdb.org') {
+        e.respondWith(
+            fetch(e.request).catch(() => caches.match(e.request))
+        );
+        return;
+    }
+    e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request))
+    );
 });
