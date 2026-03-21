@@ -732,10 +732,13 @@ const TMDB_BASE = "https://api.themoviedb.org/3";
 const IMG_BASE = "https://image.tmdb.org/t/p";
 
 const MY_SERVICES = [
-  { id: 8,    name: "Netflix",      color: "#E50914", abbr: "N",  searchUrl: (t) => `https://www.netflix.com/search?q=${encodeURIComponent(t)}` },
-  { id: 337,  name: "Disney+",      color: "#113CCF", abbr: "D+", searchUrl: (t) => `https://www.disneyplus.com/search/${encodeURIComponent(t)}` },
+  { id: 8,    name: "Netflix",       color: "#E50914", abbr: "N",  searchUrl: (t) => `https://www.netflix.com/search?q=${encodeURIComponent(t)}` },
+  { id: 337,  name: "Disney+",       color: "#113CCF", abbr: "D+", searchUrl: (t) => `https://www.disneyplus.com/search/${encodeURIComponent(t)}` },
   { id: 119,  name: "Amazon Prime",  color: "#00A8E1", abbr: "P",  searchUrl: (t) => `https://www.primevideo.com/search?phrase=${encodeURIComponent(t)}` },
   { id: 230,  name: "Crave",         color: "#0B3D91", abbr: "C",  searchUrl: (t) => `https://www.crave.ca/en/search/${encodeURIComponent(t)}` },
+  { id: 350,  name: "Apple TV+",     color: "#000000", abbr: "A+", searchUrl: (t) => `https://tv.apple.com/search?term=${encodeURIComponent(t)}` },
+  { id: 531,  name: "Paramount+",    color: "#0064FF", abbr: "P+", searchUrl: (t) => `https://www.paramountplus.com/search/?q=${encodeURIComponent(t)}` },
+  { id: 386,  name: "Peacock",       color: "#000000", abbr: "Pk", searchUrl: (t) => `https://www.peacocktv.com/search?q=${encodeURIComponent(t)}` },
 ];
 
 let API_KEY = "";
