@@ -1,4 +1,4 @@
-const CACHE_NAME = 'media-search-v5';
+const CACHE_NAME = 'media-search-v6';
 const ASSETS = [
     './MediaSearchDashboard.html',
     './manifest.json',
